@@ -1,7 +1,7 @@
 const { config } = require("dotenv");
 const { Pool } = require("pg");
 
-config()
+config();
 
 const pool = new Pool({
   host: process.env.db_host,
@@ -14,7 +14,10 @@ const pool = new Pool({
 async function query(queryStr, params = []) {
   const client = await pool.connect();
   try {
-    const { rows } = client.query(queryStr, params.length ? params : null);
+    const { rows } = await client.query(
+      queryStr,
+      params.length ? params : null
+    );
     return rows;
   } catch (error) {
     console.log(`database error: ${error.message}`);
