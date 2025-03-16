@@ -1,9 +1,29 @@
 const query = require("../database/pg");
 
-exports.getAllProducts = async function (req, res) {
+exports.getAllProducts = async function (_, res) {
   try {
-    const products = await query("select * from products;");
-    res.status(200).json(products);
+    const product = await query("select * from product;");
+    res.status(200).json(product);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+exports.getProductById = async function (req, res) {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).send({
+        message: "ID must be a number!",
+      });
+    }
+    const product = await query(`select * from product where id = ${id}`);
+    if (!product) {
+      return res.status(404).send({
+        message: "Given id not found!",
+      });
+    }
+    res.status(200).json(product);
   } catch (error) {
     console.log(error.message);
   }
@@ -11,17 +31,38 @@ exports.getAllProducts = async function (req, res) {
 
 exports.addProduct = async function (req, res) {
   try {
-    const { name, price, count } = req.body;
+    const { category_id, name, price, count } = req.body;
+    if (!category_id || !name || !price || !count) {
+      return res.status(400).send({
+        message: "Request not completed!",
+      });
+    }
 
     const product = await query(
       `
-            insert into products(name, price, count)
-            values($1, $2, $3) returning *
+            insert into product(category_id, name, price, count)
+            values($1, $2, $3, $4) returning *
             `,
-      [name, price, count]
+      [category_id, name, price, count]
     );
-    res.status(201).send(product)
+    res.status(201).send(product);
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
+  }
+};
+
+exports.deleteProduct = async function (req, res) {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).send({
+        message: "ID must be a number!",
+      });
+    }
+    const product = await query(`delete from product where id = ${id}`);
+
+    res.status(204).send();
+  } catch (error) {
+    console.log(error.message);
   }
 };
