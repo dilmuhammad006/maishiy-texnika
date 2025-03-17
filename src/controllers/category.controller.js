@@ -2,14 +2,18 @@ const query = require("../database/pg");
 
 exports.getAllCategory = async function (_, res) {
   try {
-    const category = await query(`SELECT 
-    product.id AS product_id, 
-    product.name AS product_name, 
-    product.price, 
-    product.count, 
-    category.name AS category_name
-    FROM product
-    INNER JOIN category ON product.category_id = category.id;
+    const category = await query(`SELECT json_agg(
+    json_build_object(
+        'product_id', product.id,
+        'product_name', product.name,
+        'price', product.price,
+        'count', product.count,
+        'category_name', category.name
+    )
+) AS categories
+FROM product
+INNER JOIN category ON product.category_id = category.id;
+
 `);
     res.status(200).json(category);
   } catch (error) {
