@@ -1,6 +1,6 @@
 const query = require("../database/pg");
 
-exports.getAllProducts = async function (_, res) {
+exports.getAllProducts = async function (req, res) {
   try {
     const product = await query("select * from product;");
     res.status(200).json(product);
@@ -31,13 +31,18 @@ exports.getProductById = async function (req, res) {
 
 exports.addProduct = async function (req, res) {
   try {
+    const products = await query("select * from product;");
     const { category_id, name, price, count } = req.body;
     if (!category_id || !name || !price || !count) {
       return res.status(400).send({
         message: "Request not completed!",
       });
     }
-
+    if (category_id > products.length) {
+      return res.status(400).send({
+        message: "bunday category_id topilmadi",
+      });
+    }
     const product = await query(
       `
             insert into product(category_id, name, price, count)

@@ -26,7 +26,7 @@ exports.getCategoryById = async function (req, res) {
       });
     }
     const category = await query(`select  * from category where id = ${id}`);
-    if (!category) {
+    if (!category || category.length == 0) {
       return res.status(404).send({
         message: "Given id not found!",
       });
